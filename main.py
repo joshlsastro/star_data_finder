@@ -131,16 +131,6 @@ def amateur(data):
     dec = "%sd%sm%ss" % (dec[0],dec[1],dec[2])
     location = coord.SkyCoord(ra, dec)
     constellation = location.get_constellation()
-    """
-    try:
-        time = Time(time)
-    except ValueError:
-        raise InvalidTime
-    try:
-        address = coord.EarthLocation.of_address(address)
-    except coord.name_resolve.NameResolveError:
-        raise InvalidAddress
-    """
     ra = str(location.ra.to_value()) + "\u00b0"
     dec = str(location.dec.to_value()) + "\u00b0"
     appMag = float(data[3])
