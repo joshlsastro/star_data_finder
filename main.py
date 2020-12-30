@@ -2,7 +2,6 @@
 
 import json
 from ftplib import FTP
-import gzip
 import os
 
 testStars = [30438, 21421, 91262, 3829]
@@ -29,14 +28,12 @@ def update(environ):
     ftp = FTP("cdsarc.u-strasbg.fr")
     ftp.login()
     ftp.cwd("/pub/cats/I/239")
-    with open("hip_main.dat.gz", "wb") as f:
-        ftp.retrbinary("RETR hip_main.dat.gz", f.write)
+    with open("hip_main.dat", "wb") as f:
+        ftp.retrbinary("RETR hip_main.dat", f.write)
     ftp.quit()
     print("/update: File Downloaded.")
-    with gzip.open("hip_main.dat.gz", "rb") as f:
+    with open("hip_main.dat", "rb") as f:
         text = f.read()
-    os.remove("hip_main.dat.gz")
-    print("/update: File gunzipped.")
     text = text.decode()
     stars = text.split("\n")
     stars = stars[:-1]
@@ -95,8 +92,6 @@ def _toRadians(angles):
 
 def _toAltaz(location, time, address):
     """Converts right ascension and declination to altitude-azimuth. Currently non-functional."""
-    import pdb
-    pdb.set_trace()
     import math
     jd = time.jd
     d = jd - 2451545
@@ -207,12 +202,14 @@ def professional(data):
     parallax = float(data[4])
     colorIndex = float(data[5])
     spectralType = data[6]
+    # Getting luminosity
     parallax = 1e-3 * parallax
     distance = 1 / parallax
     absMag = appMag - 5 * math.log10(distance/10)
     fluxAt10pc = mag_def("%s x" % absMag) * (u.W / (u.m**2))
     luminosity = fluxAt10pc * (4*math.pi*(10*u.pc)**2)
     luminosity = luminosity.to("W")
+    # Getting temperature and radius
     temperature = 4600 * (1/(0.92*colorIndex+1.7) + 1/(0.92*colorIndex+0.62)) * u.K
     area = luminosity / (consts.sigma_sb * temperature**4)
     radius = (area / (4*math.pi))**(1/2)
